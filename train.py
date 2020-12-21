@@ -27,11 +27,11 @@ for img_path in tqdm(glob(train_path + '/*/*.jpg')):
     img = img.resize((img_size, img_size))  # 图片resize
     arr = np.asarray(img)  # 图片转array
     X[i, :, :, :] = arr  # 赋值
-    if img_path.split('\\')[-2] == 'SSAP':
+    if 'SSAP' in img_path:
         Y[i] = 0
     else:
         Y[i] = 1
-i += 1
+    i += 1
 Y = to_categorical(Y)
 index=np.arange(train_num)
 np.random.shuffle(index)
