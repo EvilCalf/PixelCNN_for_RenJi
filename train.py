@@ -33,6 +33,10 @@ for img_path in tqdm(glob(train_path + '/*/*.jpg')):
         Y[i] = 1
 i += 1
 Y = to_categorical(Y)
+index=np.arange(train_num)
+np.random.shuffle(index)
+X=X[index,:,:,:]#X_train是训练集，y_train是训练标签
+Y=Y[index]
 
 class PixelConvLayer(layers.Layer):
     def __init__(self, mask_type, **kwargs):
