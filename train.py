@@ -16,27 +16,31 @@ num_classes = 2
 input_shape = (img_size, img_size, 3)
 n_residual_blocks = 5
 batch_size = 2
-train_path = 'train'  # 根据自己的目录修改
+
+train_path = 'train'
 train_num = len(glob(train_path + '/*/*.jpg'))
 
 X = np.zeros((train_num, img_size, img_size, 3), dtype=np.uint8)
 Y = np.zeros((train_num,), dtype=np.uint8)
+
 i = 0
 for img_path in tqdm(glob(train_path + '/*/*.jpg')):
     img = PIL.Image.open(img_path)
-    img = img.resize((img_size, img_size))  # 图片resize
-    arr = np.asarray(img)  # 图片转array
-    X[i, :, :, :] = arr  # 赋值
+    img = img.resize((img_size, img_size))
+    arr = np.asarray(img)
+    X[i, :, :, :] = arr
     if 'SSAP' in img_path:
         Y[i] = 0
     else:
         Y[i] = 1
     i += 1
+
 Y = to_categorical(Y)
-index=np.arange(train_num)
+index = np.arange(train_num)
 np.random.shuffle(index)
-X=X[index,:,:,:]#X_train是训练集，y_train是训练标签
-Y=Y[index]
+X = X[index, :, :, :]
+Y = Y[index]
+
 
 class PixelConvLayer(layers.Layer):
     def __init__(self, mask_type, **kwargs):
@@ -130,5 +134,5 @@ callbacks_list = [
 pixel_cnn.summary()
 
 history = pixel_cnn.fit(
-    x=X, y=Y, batch_size=batch_size, validation_split=0.1, epochs=1000, verbose=1, callbacks=callbacks_list,shuffle=True
+    x=X, y=Y, batch_size=batch_size, validation_split=0.1, epochs=1000, verbose=1, callbacks=callbacks_list, shuffle=True
 )
