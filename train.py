@@ -6,18 +6,33 @@ from tensorflow.python import keras
 from tensorflow.python.keras import layers
 import pandas as pd
 from glob import glob
+from tensorflow.python.ops.gen_math_ops import Xlogy
 from tqdm import tqdm
 import PIL
 from generate_data import generate_arrays_from_file
-import math
 
-train_path = 'train'  #根据自己的目录修改
+img_size = 400
+num_classes = 2
+input_shape = (img_size, img_size, 3)
+n_residual_blocks = 5
+batch_size = 2
+train_path = 'train'  # 根据自己的目录修改
 train_num = len(glob(train_path + '/*/*.jpg'))
 
-num_classes = 2
-input_shape = (400, 400, 3)
-n_residual_blocks = 5
-batch_size=2
+X = np.zeros((train_num, img_size, img_size, 3), dtype=np.uint8)
+Y = np.zeros((train_num,), dtype=np.uint8)
+i = 0
+for img_path in tqdm(glob(train_path + '/*/*.jpg')):
+    img = PIL.Image.open(img_path)
+    img = img.resize((img_size, img_size))  # 图片resize
+    arr = np.asarray(img)  # 图片转array
+    X[i, :, :, :] = arr  # 赋值
+    if img_path.split('\\')[-2] == 'SSAP':
+        Y[i] = 0
+    else:
+        Y[i] = 1
+i += 1
+Y = to_categorical(Y)
 
 class PixelConvLayer(layers.Layer):
     def __init__(self, mask_type, **kwargs):
@@ -110,6 +125,6 @@ callbacks_list = [
 ]
 pixel_cnn.summary()
 
-history = pixel_cnn.fit_generator(
-    generate_arrays_from_file('./train', batch_size=batch_size), steps_per_epoch = math.ceil(train_num/batch_size),epochs=1000, verbose=1, callbacks=callbacks_list
+history = pixel_cnn.fit(
+    x=X, y=Y, batch_size=batch_size, validation_split=0.1, epochs=1000, verbose=1, callbacks=callbacks_list,shuffle=True
 )
